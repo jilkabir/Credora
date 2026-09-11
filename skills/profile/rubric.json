@@ -1,0 +1,19 @@
+{
+  "version": "2.0",
+  "total": 100,
+  "items": [
+    {"id":"headline","points":12,"full_marks":"Clear expertise, audience or problem space, differentiated proof or specificity, readable and not keyword stuffed."},
+    {"id":"about_open","points":10,"full_marks":"First two lines make relevance obvious without generic passion language."},
+    {"id":"about_body","points":10,"full_marks":"Explains problems solved, approach, verified proof, and next step in a coherent human voice."},
+    {"id":"featured","points":8,"full_marks":"Contains current proof assets, strong work, or useful entry points."},
+    {"id":"banner","points":6,"full_marks":"Supports positioning and is visually consistent with the professional identity."},
+    {"id":"photo","points":6,"full_marks":"Clear, current, professional, and visually readable at small size."},
+    {"id":"current_role","points":10,"full_marks":"Scope plus specific outcomes; unsupported numbers are not counted."},
+    {"id":"experience_depth","points":8,"full_marks":"Recent relevant roles are detailed and older material is compressed."},
+    {"id":"skills","points":6,"full_marks":"Top skills align with the work the user wants to be known or hired for."},
+    {"id":"recommendations","points":8,"full_marks":"Recent recommendations contain concrete context or outcomes."},
+    {"id":"activity","points":8,"full_marks":"Recent activity demonstrates expertise and is consistent with the desired positioning."},
+    {"id":"contact","points":4,"full_marks":"A clear and working route to contact or continue the conversation."},
+    {"id":"credibility","points":4,"full_marks":"Important claims are supported by visible proof or are worded with appropriate restraint."}
+  ]
+}
