@@ -1,6 +1,6 @@
 # Credora Status
 
-**Current phase:** V1 Release Candidate
+**Current phase:** V1 Complete
 
 **Last status update:** 2026-09-11
 
@@ -25,14 +25,13 @@
 - CLI command examples verified
 - MIT attribution for upstream-derived work
 - Known limitations documented
-- V1 release checklist passed for pre-release verification
+- V1 release checklist passed
+- GitHub release `v1.0.0` published
 
 ## Verification evidence
 GitHub Actions run `34590277784` passed the test suite, clean-checkout self-check, and CLI smoke checks on Python 3.10, 3.11, and 3.12.
 
-## Remaining before V1 complete
-- Create the `v1.0.0` tag/release
-- Update completion status after that release exists
+GitHub release `Credora v1.0.0` was published on 2026-09-11 and points to commit `fd270b558435abaec6e6e68dc89f8ced7374db8f`.
 
 ## Completion signal
-Credora is now a **V1 RELEASE CANDIDATE**. Treat it as **V1 COMPLETE** only after the `v1.0.0` tag/release exists.
+**Credora V1 is complete. No core V1 tasks remain.**
