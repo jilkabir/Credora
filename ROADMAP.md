@@ -25,12 +25,14 @@ This file is the source of truth for whether V1 is actually complete.
 - [x] Intent-based hook selection
 - [x] Content-memory validator
 - [x] End-to-end draft pipeline runner
+- [x] Clean-checkout self-check command
 
 ## Reliability
 - [x] Basic engine unit tests
-- [ ] Memory/schema tests verified
-- [ ] End-to-end integration tests verified
-- [ ] Fresh-clone installation test
+- [x] CI workflow for Python 3.10, 3.11 and 3.12
+- [ ] Memory/schema tests verified in CI
+- [ ] End-to-end integration tests verified in CI
+- [ ] Fresh-clone installation/self-check verified
 - [ ] Command examples verified on a clean environment
 
 ## Release readiness
@@ -39,7 +41,8 @@ This file is the source of truth for whether V1 is actually complete.
 - [x] Marketplace manifest
 - [x] README foundation
 - [x] Public status tracking
-- [ ] Known-limitations section finalized
+- [x] Known limitations finalized
+- [x] V1 release checklist created
 - [ ] V1 release checklist passed
 - [ ] Tag/release `v1.0.0`
 
