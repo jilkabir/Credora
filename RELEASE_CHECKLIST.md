@@ -1,7 +1,5 @@
 # Credora V1 Release Checklist
 
-Do not create `v1.0.0` until every required item is checked and test evidence exists.
-
 ## Code and behavior
 - [x] Core writing and research skills present
 - [x] Local cleanup engine present
@@ -32,9 +30,11 @@ Verification evidence: GitHub Actions run `34590277784` passed the test suite, s
 
 ## Release
 - [x] README installation instructions rechecked
-- [x] ROADMAP has no unresolved V1 code/test blockers
-- [x] STATUS says release candidate
-- [ ] Create tag/release `v1.0.0`
+- [x] ROADMAP has no unresolved V1 blockers
+- [x] STATUS says V1 complete
+- [x] Tag/release `v1.0.0` published
+
+Release evidence: `Credora v1.0.0` was published on 2026-09-11, targeting commit `fd270b558435abaec6e6e68dc89f8ced7374db8f`.
 
 ## Release decision
-All V1 code, test, documentation, and release-candidate checks are complete. The only remaining action is creating the GitHub tag/release `v1.0.0`.
+**Credora V1 is complete. No core V1 tasks remain.**
