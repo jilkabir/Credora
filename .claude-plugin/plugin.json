@@ -1,11 +1,11 @@
 {
   "name": "credora",
-  "description": "Evidence-aware personal social content intelligence with voice personalization, anti-slop rules, approval gating, posts, comments, replies, profile optimization, planning, DMs, research posts, content memory, and quality review.",
-  "version": "0.3.0",
+  "description": "Plug-and-play personal social media manager and evidence-aware content intelligence system with private multi-user workspaces, voice personalization, anti-slop rules, approval gating, profile optimization, posts, comments, replies, planning, DMs, research posts, content memory, and quality review.",
+  "version": "0.4.0",
   "author": {
     "name": "Credora"
   },
   "repository": "https://github.com/jilkabir/Credora",
   "license": "MIT",
-  "keywords": ["linkedin", "content", "writing", "research", "fact-checking", "social", "marketing", "personalization", "voice"]
+  "keywords": ["linkedin", "content", "writing", "research", "fact-checking", "social", "marketing", "personalization", "voice", "social-media-manager", "multi-user"]
 }
