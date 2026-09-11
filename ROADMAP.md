@@ -45,8 +45,10 @@ Verification evidence: GitHub Actions run `34590277784` passed across Python 3.1
 - [x] Public status tracking
 - [x] Known limitations finalized
 - [x] V1 release checklist created
-- [x] V1 pre-release checklist passed
-- [ ] Tag/release `v1.0.0`
+- [x] V1 release checklist passed
+- [x] Tag/release `v1.0.0`
+
+Release evidence: GitHub release `Credora v1.0.0` was published on 2026-09-11 and points to commit `fd270b558435abaec6e6e68dc89f8ced7374db8f`.
 
 ## Completion rule
-Credora V1 is technically verified and is now a **RELEASE CANDIDATE**. It becomes **V1 COMPLETE** only when the `v1.0.0` tag/release is created.
+All V1 roadmap items are complete. Credora is **V1 COMPLETE**.
