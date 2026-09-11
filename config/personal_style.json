@@ -1,0 +1,30 @@
+{
+  "profile": "adrita-default",
+  "version": 1,
+  "voice_fit_threshold": 65,
+  "hard_banned_phrases": [
+    "game-changer",
+    "unlock your potential",
+    "delve into",
+    "let's dive in",
+    "here's the thing",
+    "in today's fast-paced world",
+    "elevate your game",
+    "supercharge"
+  ],
+  "generic_ctas": [
+    "thoughts?",
+    "agree?",
+    "what do you think?"
+  ],
+  "limits": {
+    "max_emojis_per_300_words": 2,
+    "max_em_dash_per_300_words": 1,
+    "max_single_sentence_paragraph_ratio": 0.55
+  },
+  "notes": [
+    "Prefer conversational, explanatory, beginner-friendly professional English.",
+    "Use practical examples and present relevant trade-offs.",
+    "Do not invent personal stories, metrics, quotes, credentials, or outcomes."
+  ]
+}
