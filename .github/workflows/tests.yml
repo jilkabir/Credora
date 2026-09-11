@@ -31,8 +31,13 @@ jobs:
         shell: bash
         run: |
           printf 'I tested this workflow with 12 records in 2026.\n' > /tmp/credora-draft.txt
+          printf 'Do you know why this matters? You can start with a simple example. However, there is a trade-off.\n' > /tmp/voice-a.txt
+          printf 'For instance, you can test the idea first. Then explain what changes and why it matters.\n' > /tmp/voice-b.txt
+          printf 'A practical explanation helps readers. You should also mention the limitation before the recommendation.\n' > /tmp/voice-c.txt
           python scripts/clean_text.py /tmp/credora-draft.txt --report > /tmp/cleaned.txt
           python scripts/quality_score.py /tmp/credora-draft.txt > /tmp/quality.json
           python scripts/select_hook.py research --limit 3 > /tmp/hooks.json
           python scripts/pipeline.py /tmp/credora-draft.txt --intent research --hooks 3 > /tmp/pipeline.json
           python scripts/validate_memory.py memory/posts.example.jsonl > /tmp/memory.json
+          python scripts/learn_voice.py /tmp/voice-a.txt /tmp/voice-b.txt /tmp/voice-c.txt > /tmp/voice-profile.json
+          python scripts/approval_gate.py /tmp/credora-draft.txt > /tmp/approval.json
