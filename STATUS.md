@@ -1,6 +1,6 @@
 # Credora Status
 
-**Current phase:** Verification and Release Preparation
+**Current phase:** V1 Release Candidate
 
 **Last status update:** 2026-09-11
 
@@ -19,24 +19,20 @@
 - End-to-end draft pipeline
 - Clean-checkout self-check command
 - DM, inbox and audit skills
-- Unit/integration test suite foundation
+- Unit and integration tests
 - GitHub Actions CI matrix for Python 3.10, 3.11 and 3.12
+- Clean-checkout self-check verified
+- CLI command examples verified
 - MIT attribution for upstream-derived work
 - Known limitations documented
-- V1 release checklist created
+- V1 release checklist passed for pre-release verification
 
-## In progress
-- CI verification
-- Fresh-checkout command verification
-- Release-candidate review
+## Verification evidence
+GitHub Actions run `34590277784` passed the test suite, clean-checkout self-check, and CLI smoke checks on Python 3.10, 3.11, and 3.12.
 
 ## Remaining before V1 complete
-- Confirm all CI tests pass
-- Confirm self-check passes from a clean checkout
-- Verify README commands in a clean environment
-- Resolve any failing V1 blocker discovered by CI
-- Mark release candidate
-- Create `v1.0.0` release/tag
+- Create the `v1.0.0` tag/release
+- Update completion status after that release exists
 
 ## Completion signal
-Do not treat this repository as V1 complete until `ROADMAP.md` has no unchecked V1 items and the release is marked `v1.0.0`.
+Credora is now a **V1 RELEASE CANDIDATE**. Treat it as **V1 COMPLETE** only after the `v1.0.0` tag/release exists.
