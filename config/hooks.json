@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "note": "Hook patterns are editorial starting points, not performance guarantees.",
+  "hooks": [
+    {"id":"specific-result","label":"Specific result","template":"{specific result}. Here is what changed.","best_for":["proof","case-study"],"risk":"Do not invent or round a result for effect."},
+    {"id":"mistake-cost","label":"Mistake and cost","template":"I got {thing} wrong. It cost {specific cost}.","best_for":["story","lesson"],"risk":"The cost must be real and attributable."},
+    {"id":"contrarian","label":"Evidence-backed contrarian","template":"I disagree with {common advice} - for one specific reason.","best_for":["opinion","analysis"],"risk":"Disagreement needs evidence or first-hand reasoning."},
+    {"id":"question","label":"Precise question","template":"What changes when {specific condition}?
+", "best_for":["research","discussion"],"risk":"Avoid generic engagement bait."},
+    {"id":"research-finding","label":"Research finding","template":"A recent study found {finding}. The important part is {limitation_or_context}.","best_for":["research"],"risk":"Never upgrade association to causation."},
+    {"id":"before-after","label":"Before and after","template":"Before: {old state}. After: {new state}. The difference was {mechanism}.","best_for":["case-study","process"],"risk":"Keep the comparison fair and sourced."},
+    {"id":"mechanism","label":"Mechanism first","template":"{outcome} happens because {mechanism}, not because {surface explanation}.","best_for":["teach","analysis"],"risk":"Mechanism claims require support."},
+    {"id":"direct-value","label":"Direct value","template":"Here is the {artifact/framework/checklist} I use for {specific task}.","best_for":["teach","resource"],"risk":"Give useful value instead of withholding it for engagement."},
+    {"id":"decision","label":"Decision","template":"I stopped {practice}. Here is the evidence that changed my mind.","best_for":["opinion","story"],"risk":"Do not imply universal applicability."},
+    {"id":"myth-context","label":"Myth with context","template":"{popular belief} is incomplete. It is true when {condition}, but not when {condition}.","best_for":["analysis","research"],"risk":"Avoid straw-manning the popular view."},
+    {"id":"number-context","label":"Number with context","template":"{number} sounds impressive until you compare it with {relevant baseline}.","best_for":["analysis","proof"],"risk":"Baseline must be comparable."},
+    {"id":"first-hand","label":"First-hand observation","template":"After {real experience}, one pattern kept showing up: {pattern}.","best_for":["story","opinion"],"risk":"Label anecdotal evidence as anecdotal."}
+  ]
+}
