@@ -1,37 +1,45 @@
 # Credora Status
 
-**Current phase:** V1 Complete
+**Current phase:** V1.1 Personalization Layer in progress
 
 **Last status update:** 2026-09-11
 
-## Done
-- Core evidence-aware writing skills
-- Voice, audience and expertise profiles
-- Research-post workflow
-- Fact-check workflow
-- Content planning and content-memory instructions
-- Performance review with sample-size caution
-- Humanize/editorial cleanup skill
-- Local text cleanup engine
-- Local editorial quality scoring engine
-- Local hook-selection engine
-- Structured memory validator
-- End-to-end draft pipeline
-- Clean-checkout self-check command
-- DM, inbox and audit skills
-- Unit and integration tests
-- GitHub Actions CI matrix for Python 3.10, 3.11 and 3.12
-- Clean-checkout self-check verified
-- CLI command examples verified
-- MIT attribution for upstream-derived work
-- Known limitations documented
-- V1 release checklist passed
-- GitHub release `v1.0.0` published
+## V1 status
+Credora V1 remains complete. The published `v1.0.0` release is unchanged.
+
+## V1.1 completed in the current personalization batch
+- Adrita default writing voice initialized in `profile/voice.md`
+- Positive personal writing rules added
+- Hard anti-slop / forbidden-style rules added
+- Separate talking-style profile scaffold added
+- Voice source metadata recorded without committing raw article bodies
+- Transparent `learn_voice.py` writing fingerprint engine added
+- Personal style guard configuration added
+- `approval_gate.py` added with `READY FOR APPROVAL` / `NEEDS REVISION` behavior
+- Master Credora orchestrator skill added
+- Plugin manifest updated for personalization positioning
+- Unit/integration tests expanded for voice learning and approval gating
+- CI CLI coverage expanded for the personalization engines
+- Clean-checkout self-check expanded to cover the personalization layer
+
+## Current personalization behavior
+- Writing defaults to the Adrita voice profile.
+- AI-slop phrases and structural patterns can block readiness.
+- Evidence, repetition, quality, and voice checks remain separate transparent signals.
+- Passing local checks never equals user approval.
+- Raw personal writing is not stored in the public repository solely for personalization.
+- Speaking style remains separate from writing style and is not inferred from article text.
 
 ## Verification evidence
-GitHub Actions run `34590277784` passed the test suite, clean-checkout self-check, and CLI smoke checks on Python 3.10, 3.11, and 3.12.
+GitHub Actions run `34594454353` passed on Python 3.10, 3.11, and 3.12. Unit/integration tests, clean-install self-check, and personalization CLI examples all succeeded.
 
-GitHub release `Credora v1.0.0` was published on 2026-09-11 and points to commit `fd270b558435abaec6e6e68dc89f8ced7374db8f`.
+## Still needed for V1.1 personalization completion
+- Build identity and positioning profiles from verified user-provided facts.
+- Add platform-specific profile/rules files for LinkedIn, Facebook, Instagram, and YouTube.
+- Feed verified full writing samples into the learner outside the public raw-data path and save the derived fingerprint.
+- Add speaking-style learning once user-provided transcripts are available.
+- Add persistent explicit feedback/preference memory with validation.
+- Connect platform/profile optimization requests through the orchestrator end to end.
 
 ## Completion signal
-**Credora V1 is complete. No core V1 tasks remain.**
+**V1 is complete. V1.1 personalization is active and partially implemented; it is not yet marked complete.**
