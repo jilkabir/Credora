@@ -1,0 +1,11 @@
+{
+  "name": "credora",
+  "description": "Evidence-aware LinkedIn content intelligence: posts, comments, replies, profile, planning, DMs, inbox triage, carousels, repurposing, audits, research posts, fact-checking, content memory, and quality review.",
+  "version": "0.2.0",
+  "author": {
+    "name": "Credora"
+  },
+  "repository": "https://github.com/jilkabir/Credora",
+  "license": "MIT",
+  "keywords": ["linkedin", "content", "writing", "research", "fact-checking", "social", "marketing"]
+}
