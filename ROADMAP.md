@@ -1,8 +1,9 @@
-# Credora V1 Roadmap
+# Credora Roadmap
 
-This file is the source of truth for whether V1 is actually complete.
+## V1
+V1 is complete and released as `v1.0.0`. Historical V1 completion remains unchanged.
 
-## Product skills
+### Product skills
 - [x] Voice
 - [x] Fact check
 - [x] Post
@@ -19,7 +20,7 @@ This file is the source of truth for whether V1 is actually complete.
 - [x] Inbox triage
 - [x] Audit
 
-## Local engines
+### Local engines
 - [x] Deterministic text cleanup
 - [x] Transparent editorial scoring
 - [x] Intent-based hook selection
@@ -27,28 +28,47 @@ This file is the source of truth for whether V1 is actually complete.
 - [x] End-to-end draft pipeline runner
 - [x] Clean-checkout self-check command
 
-## Reliability
-- [x] Basic engine unit tests
-- [x] CI workflow for Python 3.10, 3.11 and 3.12
-- [x] Memory/schema tests verified in CI
-- [x] End-to-end integration tests verified in CI
-- [x] Fresh-clone installation/self-check verified
-- [x] Command examples verified on a clean environment
+### V1 verification
+GitHub Actions run `34590277784` passed across Python 3.10, 3.11, and 3.12.
 
-Verification evidence: GitHub Actions run `34590277784` passed across Python 3.10, 3.11, and 3.12.
+GitHub release `Credora v1.0.0` was published on 2026-09-11 and points to commit `fd270b558435abaec6e6e68dc89f8ced7374db8f`.
 
-## Release readiness
-- [x] MIT license and upstream attribution
-- [x] Plugin manifest
-- [x] Marketplace manifest
-- [x] README installation and verification instructions
-- [x] Public status tracking
-- [x] Known limitations finalized
-- [x] V1 release checklist created
-- [x] V1 release checklist passed
-- [x] Tag/release `v1.0.0`
+## V1.1 Personalization
 
-Release evidence: GitHub release `Credora v1.0.0` was published on 2026-09-11 and points to commit `fd270b558435abaec6e6e68dc89f8ced7374db8f`.
+### Personal voice and style
+- [x] Initialize Adrita writing voice
+- [x] Add positive writing rules
+- [x] Add hard anti-slop rules
+- [x] Keep speaking style separate from writing style
+- [x] Record public source metadata without raw article corpus
+- [x] Add transparent writing-fingerprint learner
+- [ ] Run learner on the full verified article corpus and persist only derived fingerprint data
+- [ ] Learn speaking style from user-provided transcripts
 
-## Completion rule
-All V1 roadmap items are complete. Credora is **V1 COMPLETE**.
+### Personal brand brain
+- [ ] Identity profile
+- [ ] Positioning profile
+- [ ] Profile goals
+- [ ] LinkedIn rules/profile
+- [ ] Facebook rules/profile
+- [ ] Instagram rules/profile
+- [ ] YouTube rules/profile
+
+### Orchestration and approval
+- [x] Master Credora orchestrator skill
+- [x] Personal style guard
+- [x] Approval gate
+- [x] Explicit user approval remains required
+- [ ] Persistent validated preference-feedback memory
+- [ ] End-to-end profile optimization route through the orchestrator
+
+### Reliability
+- [x] Tests for voice learner
+- [x] Tests for style guard and approval gate
+- [x] Personalization CLI smoke checks in CI
+- [x] Clean-checkout self-check covers personalization
+
+Latest personalization verification: GitHub Actions run `34594454353` passed Python 3.10, 3.11, and 3.12, including unit/integration tests, self-check, and CLI examples.
+
+## Current completion rule
+**V1 is complete. V1.1 remains in progress until the unchecked personalization items are implemented and verified.**
