@@ -32,9 +32,9 @@ Verification evidence: GitHub Actions run `34590277784` passed the test suite, s
 
 ## Release
 - [x] README installation instructions rechecked
-- [ ] ROADMAP has no unresolved V1 blockers
-- [ ] STATUS says release candidate or complete
+- [x] ROADMAP has no unresolved V1 code/test blockers
+- [x] STATUS says release candidate
 - [ ] Create tag/release `v1.0.0`
 
 ## Release decision
-Credora is now ready to be marked as a **V1 release candidate**. It is not final until the remaining Release items are complete and `v1.0.0` exists.
+All V1 code, test, documentation, and release-candidate checks are complete. The only remaining action is creating the GitHub tag/release `v1.0.0`.
