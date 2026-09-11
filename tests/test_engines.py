@@ -3,9 +3,11 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from scripts.approval_gate import approval_report, style_guard
 from scripts.claim_guard import assess_text
 from scripts.clean_text import clean, load_config
 from scripts.decision_report import decide, repetition_check
+from scripts.learn_voice import learn
 from scripts.pipeline import run_pipeline
 from scripts.quality_score import score
 from scripts.select_hook import rank
@@ -130,6 +132,28 @@ class CredoraEngineTests(unittest.TestCase):
         }
         report = decide("This method guarantees higher engagement.", ledger=ledger)
         self.assertEqual(report["verdict"], "NEEDS EVIDENCE")
+
+    def test_voice_learner_reports_observable_features(self):
+        samples = [
+            "Do you know why this matters? You can start with a simple example. However, there is a trade-off.",
+            "For instance, you can test the idea first. Then explain what changes and why it matters.",
+            "A practical explanation helps readers. You should also mention the limitation before the recommendation.",
+        ]
+        report = learn(samples)
+        self.assertEqual(report["status"], "ok")
+        self.assertEqual(report["sample_count"], 3)
+        self.assertIn("avg_sentence_length", report["aggregate"])
+        self.assertIn("second_person_rate", report["aggregate"])
+
+    def test_personal_style_guard_blocks_ai_slop_phrase(self):
+        report = style_guard("This game-changer will unlock your potential.")
+        self.assertEqual(report["verdict"], "blocked")
+        self.assertTrue(any(flag["code"] == "banned_phrase" for flag in report["flags"]))
+
+    def test_approval_gate_requires_user_approval(self):
+        report = approval_report("I tested this process with 12 records in 2026. The result changed my plan.")
+        self.assertTrue(report["approval_required"])
+        self.assertIn(report["status"], {"READY FOR APPROVAL", "NEEDS REVISION"})
 
 
 if __name__ == "__main__":
