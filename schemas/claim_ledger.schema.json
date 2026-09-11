@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Credora Claim Ledger",
+  "type": "object",
+  "required": ["claims"],
+  "properties": {
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "claim", "status", "source_ids", "causal_language", "confidence"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "claim": {"type": "string", "minLength": 1},
+          "status": {"enum": ["supported", "partially_supported", "mixed", "unsupported", "unverifiable"]},
+          "source_ids": {"type": "array", "items": {"type": "string"}},
+          "source_date": {"type": ["string", "null"]},
+          "evidence_summary": {"type": "string"},
+          "limitations": {"type": "array", "items": {"type": "string"}},
+          "causal_language": {"type": "boolean"},
+          "confidence": {"enum": ["low", "medium", "high"]}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}
