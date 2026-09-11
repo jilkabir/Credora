@@ -1,0 +1,15 @@
+{
+  "claims": [
+    {
+      "id": "claim-001",
+      "claim": "The study found an association between higher tool use and lower code comprehension scores.",
+      "status": "supported",
+      "source_ids": ["paper-doi-or-local-source-id"],
+      "source_date": "2026-01-01",
+      "evidence_summary": "Observed association in the cited study; no causal design established.",
+      "limitations": ["Observational evidence", "Single study"],
+      "causal_language": false,
+      "confidence": "medium"
+    }
+  ]
+}
