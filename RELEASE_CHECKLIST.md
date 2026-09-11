@@ -13,12 +13,14 @@ Do not create `v1.0.0` until every required item is checked and test evidence ex
 - [x] CI workflow present
 
 ## Verification
-- [ ] Unit tests pass on Python 3.10
-- [ ] Unit tests pass on Python 3.11
-- [ ] Unit tests pass on Python 3.12
-- [ ] Clean-install self-check passes
-- [ ] Example commands verified from a fresh checkout
-- [ ] No known failing V1 blocker remains
+- [x] Unit tests pass on Python 3.10
+- [x] Unit tests pass on Python 3.11
+- [x] Unit tests pass on Python 3.12
+- [x] Clean-install self-check passes
+- [x] Example commands verified from a fresh checkout
+- [x] No known failing V1 blocker remains
+
+Verification evidence: GitHub Actions run `34590277784` passed the test suite, self-check, and CLI smoke commands on Python 3.10, 3.11, and 3.12.
 
 ## Product integrity
 - [x] MIT license included
@@ -29,10 +31,10 @@ Do not create `v1.0.0` until every required item is checked and test evidence ex
 - [x] No auto-posting in V1
 
 ## Release
-- [ ] README installation instructions rechecked
+- [x] README installation instructions rechecked
 - [ ] ROADMAP has no unresolved V1 blockers
 - [ ] STATUS says release candidate or complete
 - [ ] Create tag/release `v1.0.0`
 
 ## Release decision
-If any Verification or Release item remains unchecked, Credora V1 is still **BUILD IN PROGRESS**.
+Credora is now ready to be marked as a **V1 release candidate**. It is not final until the remaining Release items are complete and `v1.0.0` exists.
