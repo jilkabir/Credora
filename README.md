@@ -35,16 +35,31 @@ Credora started from the useful workflow ideas in Jake Schincariol's MIT-license
 - `audit`
 - `quality-audit`
 
-## Local engines
+## Requirements
 
-Credora now includes dependency-free Python tools:
+- Python 3.10, 3.11, or 3.12
+- no third-party Python dependencies for the local engines
+
+## Quick start
+
+```bash
+git clone https://github.com/jilkabir/Credora.git
+cd Credora
+python3 scripts/self_check.py
+```
+
+A passing self-check prints `"status": "PASS"`.
+
+## Local engines
 
 ```bash
 python3 scripts/clean_text.py draft.txt --report
 python3 scripts/quality_score.py draft.txt
 python3 scripts/quality_score.py before.txt after.txt
 python3 scripts/select_hook.py research --limit 3
-python3 -m unittest tests/test_engines.py
+python3 scripts/pipeline.py draft.txt --intent research --hooks 3
+python3 scripts/validate_memory.py memory/posts.example.jsonl
+python3 -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
 `clean_text.py` performs deterministic cleanup without rewriting factual meaning.
@@ -52,6 +67,14 @@ python3 -m unittest tests/test_engines.py
 `quality_score.py` scores editorial signals such as specificity, rhythm, generic-language density, structural repetition, and readability. It is **not an AI detector** and does not claim that text is undetectable.
 
 `select_hook.py` chooses editorial hook patterns by content intent. The hook library is deliberately treated as a writing aid, not as a reach-prediction model.
+
+`pipeline.py` runs cleanup, editorial scoring, and intent-based hook selection in one local command. It does not fact-check claims; factual content still needs the `fact-check` workflow.
+
+`validate_memory.py` checks the structure of Credora JSONL content-memory records. It does not verify whether stored claims are true.
+
+## Verification
+
+GitHub Actions runs the unit/integration tests, clean-checkout self-check, and CLI smoke checks on Python 3.10, 3.11, and 3.12.
 
 ## Why Credora is different
 
@@ -73,19 +96,25 @@ python3 -m unittest tests/test_engines.py
 
 ```text
 .claude-plugin/       Claude plugin metadata
+.github/workflows/    CI verification
 config/               hooks and editable editorial flags
+memory/               example content-memory records
 profile/              voice, expertise and audience profiles
 scripts/              runnable local Python engines
 skills/               Credora skill workflows
-tests/                engine tests
+tests/                engine and integration tests
 LICENSE                MIT license and retained upstream notice
 NOTICE.md              upstream attribution
 ```
 
+## Limitations
+
+See `KNOWN_LIMITATIONS.md` before treating Credora output as verified evidence or platform guidance.
+
+## Release status
+
+See `ROADMAP.md`, `STATUS.md`, and `RELEASE_CHECKLIST.md` for the authoritative V1 completion state.
+
 ## Upstream attribution
 
 Portions of the project are adapted from `linkedin-agent-skill` by Jake Schincariol, used under the MIT License. See `LICENSE` and `NOTICE.md`.
-
-## Status
-
-V1 foundation in active development. Content generation remains human-approved; Credora does not automatically publish to LinkedIn.
