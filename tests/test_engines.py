@@ -2,12 +2,15 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from scripts.approval_gate import approval_report, style_guard
 from scripts.claim_guard import assess_text
 from scripts.clean_text import clean, load_config
 from scripts.context_bundle import build as build_context
+from scripts.credora import workspace_status
 from scripts.decision_report import decide, repetition_check
+from scripts.init_user import init_user
 from scripts.learn_voice import learn
 from scripts.pipeline import run_pipeline
 from scripts.quality_score import score
@@ -121,6 +124,47 @@ class CredoraEngineTests(unittest.TestCase):
         report = review_draft("I tested this workflow with 12 records in 2026. It changed how I explain the result.")
         self.assertIn(report["status"], {"READY FOR APPROVAL", "NEEDS REVISION"})
         self.assertTrue(report["approval_required"])
+
+    def test_init_user_creates_private_workspace(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            temp_root = Path(tmp)
+            with patch("scripts.init_user.USERS_ROOT", temp_root / "users"):
+                result = init_user("Test Person")
+                root = temp_root / "users" / "test-person"
+                self.assertEqual(result["status"], "created")
+                self.assertTrue((root / "identity.md").exists())
+                self.assertTrue((root / "platforms" / "linkedin.md").exists())
+                manifest = json.loads((root / "credora.json").read_text(encoding="utf-8"))
+                self.assertTrue(manifest["approval_required"])
+                self.assertFalse(manifest["auto_publish"])
+
+    def test_context_bundle_can_load_user_workspace(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp) / "users" / "demo"
+            (base / "platforms").mkdir(parents=True)
+            (base / "identity.md").write_text("# Identity\nDemo Person", encoding="utf-8")
+            (base / "platforms" / "linkedin.md").write_text("# LinkedIn\nDemo rules", encoding="utf-8")
+            with patch("scripts.context_bundle.ROOT", Path(tmp)):
+                bundle = build_context("linkedin", "post", "demo")
+            self.assertIn("Demo Person", bundle)
+            self.assertIn("Demo rules", bundle)
+            self.assertIn("Missing context", bundle)
+
+    def test_workspace_status_reports_uninitialized_fields(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "users" / "demo"
+            (root / "platforms").mkdir(parents=True)
+            required = ["identity.md", "positioning.md", "expertise.md", "audience.md", "voice.md", "writing-rules.md", "forbidden-style.md", "profile-goals.md"]
+            for rel in required:
+                (root / rel).write_text("Status: not initialized\n", encoding="utf-8")
+            for platform in ["linkedin", "facebook", "instagram", "youtube"]:
+                (root / "platforms" / f"{platform}.md").write_text("rules\n", encoding="utf-8")
+            with patch("scripts.credora.ROOT", Path(tmp)):
+                report = workspace_status("demo")
+            self.assertTrue(report["ready"])
+            self.assertIn("identity.md", report["uninitialized_files"])
+            self.assertTrue(report["approval_required"])
+            self.assertFalse(report["auto_publish"])
 
 
 if __name__ == "__main__":
