@@ -1,0 +1,63 @@
+name: Release Credora v1.0.0
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/release-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify release preconditions
+        run: |
+          python -m unittest discover -s tests -p 'test_*.py' -v
+          python scripts/self_check.py
+
+      - name: Create v1.0.0 release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v1.0.0 >/dev/null 2>&1; then
+            echo 'v1.0.0 already exists; nothing to do.'
+            exit 0
+          fi
+
+          cat > /tmp/release-notes.md <<'EOF'
+          # Credora v1.0.0
+
+          First verified V1 release of Credora, an evidence-aware professional content intelligence toolkit for LinkedIn.
+
+          ## Included
+          - evidence-aware post and research-post workflows
+          - fact-check, voice, audience, content-memory and performance-review skills
+          - deterministic text cleanup
+          - transparent editorial quality scoring
+          - intent-based hook selection
+          - content-memory validation
+          - end-to-end local draft pipeline
+          - DM, inbox, audit, carousel, profile, comment, reply and repurpose workflows
+          - CI verification across Python 3.10, 3.11 and 3.12
+
+          ## Verification
+          The release workflow re-runs the unit/integration suite and the clean-checkout self-check before publishing.
+
+          ## Important limitations
+          Credora does not auto-publish to LinkedIn, does not claim AI-detector bypass, and does not guarantee platform reach or engagement. Factual claims still require source verification.
+
+          ## Attribution
+          Portions are adapted from Jake Schincariol's MIT-licensed linkedin-agent-skill. See LICENSE and NOTICE.md.
+          EOF
+
+          gh release create v1.0.0 \
+            --target "$GITHUB_SHA" \
+            --title 'Credora v1.0.0' \
+            --notes-file /tmp/release-notes.md
