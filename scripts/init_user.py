@@ -44,7 +44,7 @@ def init_user(name: str, slug: str | None = None, force: bool = False) -> dict:
         path.parent.mkdir(parents=True, exist_ok=True)
         if force or not path.exists():
             path.write_text(content, encoding="utf-8")
-            created.append(str(path.relative_to(ROOT)))
+            created.append(rel)
     for folder in ["writing-samples", "speaking-samples", "content-history", "performance"]:
         (root / folder).mkdir(exist_ok=True)
     manifest = {
