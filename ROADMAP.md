@@ -23,13 +23,13 @@ This file is the source of truth for whether V1 is actually complete.
 - [x] Deterministic text cleanup
 - [x] Transparent editorial scoring
 - [x] Intent-based hook selection
-- [ ] Content-memory validator
-- [ ] End-to-end draft pipeline runner
+- [x] Content-memory validator
+- [x] End-to-end draft pipeline runner
 
 ## Reliability
 - [x] Basic engine unit tests
-- [ ] Memory/schema tests
-- [ ] End-to-end integration tests
+- [ ] Memory/schema tests verified
+- [ ] End-to-end integration tests verified
 - [ ] Fresh-clone installation test
 - [ ] Command examples verified on a clean environment
 
