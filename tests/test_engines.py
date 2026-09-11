@@ -6,10 +6,12 @@ from pathlib import Path
 from scripts.approval_gate import approval_report, style_guard
 from scripts.claim_guard import assess_text
 from scripts.clean_text import clean, load_config
+from scripts.context_bundle import build as build_context
 from scripts.decision_report import decide, repetition_check
 from scripts.learn_voice import learn
 from scripts.pipeline import run_pipeline
 from scripts.quality_score import score
+from scripts.review_draft import review as review_draft
 from scripts.select_hook import rank
 from scripts.validate_memory import validate_jsonl
 from scripts.validate_preferences import validate as validate_preferences
@@ -108,6 +110,17 @@ class CredoraEngineTests(unittest.TestCase):
             report = validate_preferences(path)
         self.assertTrue(report["valid"])
         self.assertEqual(report["records"], 1)
+
+    def test_context_bundle_loads_linkedin_personalization(self):
+        bundle = build_context("linkedin", "post")
+        self.assertIn("profile/voice.md", bundle)
+        self.assertIn("profile/platforms/linkedin.md", bundle)
+        self.assertIn("READY FOR APPROVAL", bundle)
+
+    def test_review_draft_keeps_user_approval_required(self):
+        report = review_draft("I tested this workflow with 12 records in 2026. It changed how I explain the result.")
+        self.assertIn(report["status"], {"READY FOR APPROVAL", "NEEDS REVISION"})
+        self.assertTrue(report["approval_required"])
 
 
 if __name__ == "__main__":
