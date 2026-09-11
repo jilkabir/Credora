@@ -3,18 +3,17 @@
 
 Runs only with the Python standard library. It verifies that the core engines
 can import, load their configuration, process a draft, validate memory, and
-produce an end-to-end pipeline result without external dependencies.
+produce representative output without external dependencies.
 """
 from __future__ import annotations
 
 import json
-import tempfile
 from pathlib import Path
 
 from scripts.clean_text import clean, load_config as load_style_config
 from scripts.quality_score import score
 from scripts.select_hook import rank
-from scripts.validate_memory import validate_file
+from scripts.validate_memory import validate_jsonl
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -41,8 +40,8 @@ def main() -> int:
     if not cleaned or result.get("overall") is None or not hooks:
         raise SystemExit("Core engine self-check failed")
 
-    memory_result = validate_file(ROOT / "memory" / "posts.example.jsonl")
-    if memory_result.get("invalid", 0) != 0:
+    memory_result = validate_jsonl(ROOT / "memory" / "posts.example.jsonl")
+    if not memory_result.get("valid"):
         raise SystemExit("Example memory file failed validation")
 
     summary = {
@@ -50,7 +49,7 @@ def main() -> int:
         "cleanup_report": report,
         "quality_score": result["overall"],
         "research_hook_options": len(hooks),
-        "memory_records_valid": memory_result.get("valid", 0),
+        "memory_records_checked": memory_result.get("records", 0),
         "external_dependencies": 0,
     }
     print(json.dumps(summary, indent=2, ensure_ascii=False))
