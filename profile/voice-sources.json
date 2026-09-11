@@ -1,0 +1,27 @@
+{
+  "profile": "adrita-default",
+  "policy": "Store source metadata only in the public repository; do not commit full article bodies solely for personalization.",
+  "sources": [
+    {"url": "https://diviextended.com/non-profit-website-with-wordpress-and-divi/", "authorship_basis": "user_confirmed"},
+    {"url": "https://wedevs.com/blog/329203/how-to-start-online-business-with-no-money/", "authorship_basis": "user_confirmed"},
+    {"url": "https://wedevs.com/blog/348939/first-contentful-paint-largest-contentful-paint/", "authorship_basis": "user_confirmed"},
+    {"url": "https://wedevs.com/blog/308897/proven-tips-to-attract-local-customers/", "authorship_basis": "user_confirmed"},
+    {"url": "https://wedevs.com/blog/326825/headless-wordpress-headless-cms/", "authorship_basis": "user_confirmed_and_pasted_author_attribution"},
+    {"url": "https://buddyboss.com/resources/docs/integrations/onesignal-for-web-push-notifications/", "authorship_basis": "user_confirmed"},
+    {"url": "https://wedevs.com/blog/334733/best-text-editors/", "authorship_basis": "user_confirmed"},
+    {"url": "https://wedevs.com/blog/506024/ai-assistants-for-wordpress/", "authorship_basis": "user_confirmed"},
+    {"url": "https://wedevs.com/blog/492032/how-to-optimize-videos/", "authorship_basis": "user_confirmed"},
+    {"url": "https://wedevs.com/blog/500521/wordpress-site-mobile-responsive/", "authorship_basis": "user_confirmed"},
+    {"url": "https://wedevs.com/blog/499220/how-to-add-rich-snippets-to-wordpress/", "authorship_basis": "user_confirmed"},
+    {"url": "https://wedevs.com/blog/489429/digital-products-to-sell/", "authorship_basis": "user_confirmed"},
+    {"url": "https://wedevs.com/blog/436353/how-to-edit-image-metadata/", "authorship_basis": "user_confirmed"},
+    {"url": "https://wedevs.com/blog/237349/best-woocommerce-pos-plugins/", "authorship_basis": "user_confirmed"},
+    {"url": "https://wedevs.com/blog/367784/happy-birthday-wordpress-history-rewards/", "authorship_basis": "user_confirmed"}
+  ],
+  "excluded": [
+    {
+      "url": "https://wedevs.com/blog/360051/how-to-write-a-discount-offer/",
+      "reason": "Current supplied version is attributed to Sabirah Islam and is excluded from Adrita voice training unless the original Adrita-authored version is separately supplied."
+    }
+  ]
+}
