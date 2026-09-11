@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "safe_replacements": {
+    "in today's fast-paced world": "today",
+    "at the end of the day": "ultimately",
+    "it is important to note that": "note that",
+    "with that being said": "still",
+    "in order to": "to",
+    "a wide range of": "many"
+  },
+  "generic_phrases": [
+    "in today's fast-paced world",
+    "game-changer",
+    "unlock your potential",
+    "leverage the power of",
+    "seamless experience",
+    "robust solution",
+    "delve into",
+    "it is important to note that",
+    "let that sink in",
+    "thoughts?",
+    "agree?"
+  ],
+  "structural_tells": [
+    "it's not just",
+    "not only",
+    "the result?",
+    "the truth?",
+    "here's the thing",
+    "let that sink in"
+  ]
+}
