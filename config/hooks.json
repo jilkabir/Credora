@@ -5,8 +5,7 @@
     {"id":"specific-result","label":"Specific result","template":"{specific result}. Here is what changed.","best_for":["proof","case-study"],"risk":"Do not invent or round a result for effect."},
     {"id":"mistake-cost","label":"Mistake and cost","template":"I got {thing} wrong. It cost {specific cost}.","best_for":["story","lesson"],"risk":"The cost must be real and attributable."},
     {"id":"contrarian","label":"Evidence-backed contrarian","template":"I disagree with {common advice} - for one specific reason.","best_for":["opinion","analysis"],"risk":"Disagreement needs evidence or first-hand reasoning."},
-    {"id":"question","label":"Precise question","template":"What changes when {specific condition}?
-", "best_for":["research","discussion"],"risk":"Avoid generic engagement bait."},
+    {"id":"question","label":"Precise question","template":"What changes when {specific condition}?","best_for":["research","discussion"],"risk":"Avoid generic engagement bait."},
     {"id":"research-finding","label":"Research finding","template":"A recent study found {finding}. The important part is {limitation_or_context}.","best_for":["research"],"risk":"Never upgrade association to causation."},
     {"id":"before-after","label":"Before and after","template":"Before: {old state}. After: {new state}. The difference was {mechanism}.","best_for":["case-study","process"],"risk":"Keep the comparison fair and sourced."},
     {"id":"mechanism","label":"Mechanism first","template":"{outcome} happens because {mechanism}, not because {surface explanation}.","best_for":["teach","analysis"],"risk":"Mechanism claims require support."},
