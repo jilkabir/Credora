@@ -26,3 +26,13 @@ jobs:
 
       - name: Run clean-install self check
         run: python scripts/self_check.py
+
+      - name: Verify CLI examples
+        shell: bash
+        run: |
+          printf 'I tested this workflow with 12 records in 2026.\n' > /tmp/credora-draft.txt
+          python scripts/clean_text.py /tmp/credora-draft.txt --report > /tmp/cleaned.txt
+          python scripts/quality_score.py /tmp/credora-draft.txt > /tmp/quality.json
+          python scripts/select_hook.py research --limit 3 > /tmp/hooks.json
+          python scripts/pipeline.py /tmp/credora-draft.txt --intent research --hooks 3 > /tmp/pipeline.json
+          python scripts/validate_memory.py memory/posts.example.jsonl > /tmp/memory.json
