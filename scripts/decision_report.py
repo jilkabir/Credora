@@ -8,8 +8,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from difflib import SequenceMatcher
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from scripts.claim_guard import assess_text
 from scripts.quality_score import load_config, score
