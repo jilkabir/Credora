@@ -16,25 +16,27 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.approval_gate import approval_report
-from scripts.decision_report import decide
 
 
-def review(text: str, ledger: dict | None = None, voice_samples: list[str] | None = None, history: list[str] | None = None) -> dict:
-    decision = decide(text, ledger=ledger, voice_samples=voice_samples, history=history)
-    approval = approval_report(text)
-
-    blockers = []
-    if decision["verdict"] != "READY":
-        blockers.append(decision["verdict"])
-    if approval["status"] != "READY FOR APPROVAL":
-        blockers.append(approval["status"])
-
-    status = "READY FOR APPROVAL" if not blockers else "NEEDS REVISION"
+def review(
+    text: str,
+    ledger: dict | None = None,
+    voice_samples: list[str] | None = None,
+    history: list[str] | None = None,
+    config: dict | None = None,
+) -> dict:
+    approval = approval_report(
+        text,
+        ledger=ledger,
+        voice_samples=voice_samples,
+        history=history,
+        config=config,
+    )
     return {
-        "status": status,
+        "status": approval["status"],
         "approval_required": True,
-        "blockers": blockers,
-        "decision": decision,
+        "blockers": approval["blockers"],
+        "decision": approval["decision"],
         "approval_gate": approval,
         "note": "Credora review only. No content is published automatically.",
     }
