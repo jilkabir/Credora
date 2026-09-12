@@ -30,7 +30,12 @@ PLATFORMS = {"linkedin", "facebook", "instagram", "youtube"}
 
 
 def _root_for(user: str | None) -> Path:
-    return user_root(ROOT, user) if user else ROOT / "profile"
+    if not user:
+        return ROOT / "profile"
+    root = user_root(ROOT, user)
+    if not root.is_dir():
+        raise ValueError(f"User workspace does not exist: {user}")
+    return root
 
 
 def _load_preferences(path: Path, platform: str, task: str) -> list[dict]:
@@ -39,15 +44,20 @@ def _load_preferences(path: Path, platform: str, task: str) -> list[dict]:
     accepted = {"all", "global", "writing", platform, task}
     if platform == "youtube" or task in {"video", "video-script", "script"}:
         accepted.add("speaking")
-    records = []
-    for line in path.read_text(encoding="utf-8").splitlines():
+    records: list[dict] = []
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
         if not line.strip():
             continue
         try:
             row = json.loads(line)
-        except json.JSONDecodeError:
-            continue
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Invalid preferences JSON on line {line_number} in {path}: {exc.msg}") from exc
+        if not isinstance(row, dict):
+            raise ValueError(f"Invalid preference on line {line_number} in {path}: expected an object")
         if row.get("active") is True and row.get("scope") in accepted:
+            rule = row.get("rule")
+            if not isinstance(rule, str) or not rule.strip():
+                raise ValueError(f"Invalid active preference on line {line_number} in {path}: rule must be non-empty text")
             records.append(row)
     return records
 
