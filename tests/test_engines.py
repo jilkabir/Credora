@@ -167,6 +167,12 @@ class CredoraEngineTests(unittest.TestCase):
             self.assertIn("Demo rules", bundle)
             self.assertIn("Missing context", bundle)
 
+    def test_context_bundle_rejects_path_traversal_user(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch("scripts.context_bundle.ROOT", Path(tmp)):
+                with self.assertRaises(ValueError):
+                    build_context("linkedin", "post", "../outside")
+
     def test_workspace_status_is_not_ready_when_profile_is_uninitialized(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "users" / "demo"
@@ -184,6 +190,13 @@ class CredoraEngineTests(unittest.TestCase):
             self.assertTrue(report["approval_required"])
             self.assertFalse(report["auto_publish"])
 
+    def test_workspace_status_rejects_path_traversal(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch("scripts.credora.ROOT", Path(tmp)):
+                report = workspace_status("../outside")
+            self.assertEqual(report["status"], "error")
+            self.assertFalse(report["ready"])
+
     def test_user_review_inputs_load_private_voice_history_and_ledger(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "users" / "demo"
@@ -197,6 +210,15 @@ class CredoraEngineTests(unittest.TestCase):
             self.assertEqual(ledger, {"claims": []})
             self.assertEqual(samples, ["My real writing sample."])
             self.assertEqual(history, ["My earlier post."])
+
+    def test_user_review_inputs_reject_malformed_claim_ledger(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "users" / "demo"
+            root.mkdir(parents=True)
+            (root / "claim-ledger.json").write_text("{not-json", encoding="utf-8")
+            with patch("scripts.credora.ROOT", Path(tmp)):
+                with self.assertRaises(ValueError):
+                    _load_user_review_inputs("demo")
 
 
 if __name__ == "__main__":
