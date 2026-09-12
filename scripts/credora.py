@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Credora plug-and-play command line entrypoint.
 
-One command surface for private user setup, context generation, workspace status,
-and personalized draft review. It never auto-publishes.
+One command surface for private user setup, guided onboarding, brand learning,
+context generation, workspace status, and personalized draft review. It never
+auto-publishes.
 """
 from __future__ import annotations
 
@@ -16,7 +17,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.context_bundle import build
+from scripts.guided_onboarding import apply_answers, interactive_answers
 from scripts.init_user import init_user
+from scripts.profile_intelligence import save_for_user
 from scripts.review_draft import review
 from scripts.workspace import user_root
 
@@ -40,6 +43,7 @@ def workspace_status(slug: str) -> dict:
         path = root / rel
         if path.exists() and "Status: not initialized" in path.read_text(encoding="utf-8"):
             uninitialized.append(rel)
+    brain_path = root / "brand-brain.json"
     ready = not missing and not uninitialized
     return {
         "status": "ready" if ready else "incomplete",
@@ -47,6 +51,8 @@ def workspace_status(slug: str) -> dict:
         "ready": ready,
         "missing_files": missing,
         "uninitialized_files": uninitialized,
+        "brand_brain_built": brain_path.is_file(),
+        "writing_samples": len(_read_text_files(root / "writing-samples")),
         "approval_required": True,
         "auto_publish": False,
     }
@@ -102,6 +108,14 @@ def main() -> int:
     setup.add_argument("name")
     setup.add_argument("--slug")
 
+    onboard = sub.add_parser("onboard", help="Friendly guided personal-brand setup")
+    onboard.add_argument("user")
+    onboard.add_argument("--answers", help="Optional JSON answers file instead of interactive questions")
+    onboard.add_argument("--overwrite", action="store_true")
+
+    learn_cmd = sub.add_parser("learn", help="Build or refresh the user's personal brand brain")
+    learn_cmd.add_argument("user")
+
     status = sub.add_parser("status", help="Inspect a user workspace")
     status.add_argument("user")
 
@@ -124,6 +138,39 @@ def main() -> int:
         try:
             result = init_user(args.name, args.slug)
         except (FileExistsError, ValueError) as exc:
+            return _error(str(exc))
+        result["next"] = f"python scripts/credora.py onboard {result['slug']}"
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        return 0
+
+    if args.command == "onboard":
+        try:
+            root = user_root(ROOT, args.user)
+        except ValueError as exc:
+            return _error(str(exc))
+        if not root.is_dir():
+            return _error(f"User workspace does not exist: {args.user}")
+        if args.answers:
+            path = Path(args.answers)
+            if not path.is_file():
+                return _error(f"Answers file does not exist: {args.answers}")
+            try:
+                answers = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+                return _error(f"Could not read onboarding answers: {exc}")
+            if not isinstance(answers, dict):
+                return _error("Onboarding answers must be a JSON object.")
+        else:
+            answers = interactive_answers()
+        updated = apply_answers(root, answers, overwrite=args.overwrite)
+        brain = save_for_user(args.user, ROOT)
+        print(json.dumps({"status": "ok", "user": args.user, "updated_files": updated, "brand_brain": brain, "next": f"Add real writing samples to users/{args.user}/writing-samples/ then run: python scripts/credora.py learn {args.user}"}, indent=2, ensure_ascii=False))
+        return 0
+
+    if args.command == "learn":
+        try:
+            result = save_for_user(args.user, ROOT)
+        except (FileNotFoundError, ValueError, OSError, UnicodeError) as exc:
             return _error(str(exc))
         print(json.dumps(result, indent=2, ensure_ascii=False))
         return 0
