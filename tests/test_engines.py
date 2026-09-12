@@ -8,7 +8,7 @@ from scripts.approval_gate import approval_report, style_guard
 from scripts.claim_guard import assess_text
 from scripts.clean_text import clean, load_config
 from scripts.context_bundle import build as build_context
-from scripts.credora import workspace_status
+from scripts.credora import _load_user_review_inputs, workspace_status
 from scripts.decision_report import decide, repetition_check
 from scripts.init_user import init_user
 from scripts.learn_voice import learn
@@ -91,6 +91,16 @@ class CredoraEngineTests(unittest.TestCase):
         report = decide("This method guarantees higher engagement.", ledger=ledger)
         self.assertEqual(report["verdict"], "NEEDS EVIDENCE")
 
+    def test_decision_report_uses_supplied_voice_threshold(self):
+        samples = ["I tested this myself. Short sentences help me explain the result. I avoid hype."]
+        report = decide(
+            "I tested this myself. Short sentences help explain the result.",
+            voice_samples=samples,
+            voice_threshold=101,
+        )
+        self.assertEqual(report["verdict"], "VOICE MISMATCH")
+        self.assertEqual(report["thresholds"]["voice_fit"], 101.0)
+
     def test_voice_learner_reports_observable_features(self):
         samples = ["Do you know why this matters? You can start with a simple example. However, there is a trade-off.", "For instance, you can test the idea first. Then explain what changes and why it matters.", "A practical explanation helps readers. You should also mention the limitation before the recommendation."]
         report = learn(samples)
@@ -125,6 +135,13 @@ class CredoraEngineTests(unittest.TestCase):
         self.assertIn(report["status"], {"READY FOR APPROVAL", "NEEDS REVISION"})
         self.assertTrue(report["approval_required"])
 
+    def test_review_draft_propagates_evidence_inputs_to_approval_gate(self):
+        ledger = {"claims":[{"id":"c4","claim":"This guarantees higher engagement.","status":"unsupported","source_ids":[],"causal_language":False,"confidence":"low"}]}
+        report = review_draft("This guarantees higher engagement.", ledger=ledger)
+        self.assertEqual(report["decision"]["verdict"], "NEEDS EVIDENCE")
+        self.assertEqual(report["approval_gate"]["decision"]["verdict"], "NEEDS EVIDENCE")
+        self.assertEqual(report["status"], "NEEDS REVISION")
+
     def test_init_user_creates_private_workspace(self):
         with tempfile.TemporaryDirectory() as tmp:
             temp_root = Path(tmp)
@@ -150,7 +167,7 @@ class CredoraEngineTests(unittest.TestCase):
             self.assertIn("Demo rules", bundle)
             self.assertIn("Missing context", bundle)
 
-    def test_workspace_status_reports_uninitialized_fields(self):
+    def test_workspace_status_is_not_ready_when_profile_is_uninitialized(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "users" / "demo"
             (root / "platforms").mkdir(parents=True)
@@ -161,10 +178,25 @@ class CredoraEngineTests(unittest.TestCase):
                 (root / "platforms" / f"{platform}.md").write_text("rules\n", encoding="utf-8")
             with patch("scripts.credora.ROOT", Path(tmp)):
                 report = workspace_status("demo")
-            self.assertTrue(report["ready"])
+            self.assertFalse(report["ready"])
+            self.assertEqual(report["status"], "incomplete")
             self.assertIn("identity.md", report["uninitialized_files"])
             self.assertTrue(report["approval_required"])
             self.assertFalse(report["auto_publish"])
+
+    def test_user_review_inputs_load_private_voice_history_and_ledger(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "users" / "demo"
+            (root / "writing-samples").mkdir(parents=True)
+            (root / "content-history").mkdir(parents=True)
+            (root / "writing-samples" / "one.txt").write_text("My real writing sample.", encoding="utf-8")
+            (root / "content-history" / "old.md").write_text("My earlier post.", encoding="utf-8")
+            (root / "claim-ledger.json").write_text(json.dumps({"claims": []}), encoding="utf-8")
+            with patch("scripts.credora.ROOT", Path(tmp)):
+                ledger, samples, history = _load_user_review_inputs("demo")
+            self.assertEqual(ledger, {"claims": []})
+            self.assertEqual(samples, ["My real writing sample."])
+            self.assertEqual(history, ["My earlier post."])
 
 
 if __name__ == "__main__":
