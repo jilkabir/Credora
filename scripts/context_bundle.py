@@ -62,6 +62,56 @@ def _load_preferences(path: Path, platform: str, task: str) -> list[dict]:
     return records
 
 
+def _load_brand_brain(path: Path) -> dict | None:
+    if not path.exists():
+        return None
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid brand brain JSON in {path}: {exc.msg}") from exc
+    if not isinstance(value, dict):
+        raise ValueError(f"Invalid brand brain in {path}: expected an object")
+    return value
+
+
+def _brand_brain_context(brain: dict) -> str:
+    strategy = brain.get("writing_strategy", {}) if isinstance(brain.get("writing_strategy"), dict) else {}
+    voice = brain.get("voice_fingerprint", {}) if isinstance(brain.get("voice_fingerprint"), dict) else {}
+    aggregate = voice.get("aggregate", {}) if isinstance(voice.get("aggregate"), dict) else {}
+    lines = [
+        "\n---\n\n## Personal Brand Brain\n",
+        f"Confidence: {brain.get('confidence', 'unknown')}\n",
+        f"Profile completeness: {brain.get('profile_completeness', 0)}%\n",
+    ]
+    signals = brain.get("positioning_signals", [])
+    if isinstance(signals, list) and signals:
+        lines.append("Positioning signals: " + ", ".join(str(x) for x in signals[:16]) + "\n")
+    north_star = strategy.get("north_star")
+    if north_star:
+        lines.append(f"North star: {north_star}\n")
+    sequence = strategy.get("draft_sequence", [])
+    if isinstance(sequence, list) and sequence:
+        lines.append("\nDraft intelligence sequence:\n")
+        lines.extend(f"- {item}\n" for item in sequence)
+    anti = strategy.get("anti_generic_rules", [])
+    if isinstance(anti, list) and anti:
+        lines.append("\nAnti-generic rules:\n")
+        lines.extend(f"- {item}\n" for item in anti)
+    if aggregate:
+        lines.append("\nObservable writing rhythm:\n")
+        for key in ("avg_sentence_length", "short_sentence_ratio", "avg_paragraph_words", "first_person_rate", "second_person_rate", "emoji_rate"):
+            if key in aggregate:
+                lines.append(f"- {key}: {aggregate[key]}\n")
+        transitions = aggregate.get("common_transitions")
+        if transitions:
+            lines.append(f"- common_transitions: {transitions}\n")
+    warnings = brain.get("warnings", [])
+    if isinstance(warnings, list) and warnings:
+        lines.append("\nConfidence warnings:\n")
+        lines.extend(f"- {item}\n" for item in warnings)
+    return "".join(lines)
+
+
 def build(platform: str, task: str, user: str | None = None) -> str:
     if platform not in PLATFORMS:
         raise ValueError(f"Unsupported platform: {platform}")
@@ -82,6 +132,13 @@ def build(platform: str, task: str, user: str | None = None) -> str:
             continue
         sections.append(f"\n---\n\n## Source: `{path.relative_to(ROOT)}`\n\n{path.read_text(encoding='utf-8').strip()}\n")
 
+    if user:
+        brain = _load_brand_brain(base / "brand-brain.json")
+        if brain:
+            sections.append(_brand_brain_context(brain))
+        else:
+            sections.append("\n---\n\n## Personal Brand Brain\nNot built yet. Run `python scripts/credora.py learn <user>` after onboarding and adding writing samples.\n")
+
     preferences = _load_preferences(base / "preferences.jsonl", platform, task)
     if preferences:
         sections.append("\n---\n\n## Active explicit user preferences\n")
@@ -96,7 +153,9 @@ def build(platform: str, task: str, user: str | None = None) -> str:
 
     sections.append(
         "\n---\n\n## Execution rule\n"
+        "Start from the user's personal brand nerve, not from a generic viral template. "
         "Use the loaded context as constraints, not as permission to invent missing facts. "
+        "Choose one audience-relevant angle, preserve the user's verified positioning, and use their observable writing rhythm when confidence allows. "
         "Draft the requested content, then run Credora review checks. "
         "Return READY FOR APPROVAL only when checks pass; user approval is still required. "
         "Never auto-publish from this bundle.\n"
