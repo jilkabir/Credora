@@ -73,8 +73,16 @@ def approval_report(
     history: list[str] | None = None,
     config: dict | None = None,
 ) -> dict:
-    decision = decide(text, ledger=ledger, voice_samples=voice_samples, history=history)
-    style = style_guard(text, config=config)
+    effective_config = config or load_style()
+    voice_threshold = float(effective_config.get("voice_fit_threshold", 65))
+    decision = decide(
+        text,
+        ledger=ledger,
+        voice_samples=voice_samples,
+        history=history,
+        voice_threshold=voice_threshold,
+    )
+    style = style_guard(text, config=effective_config)
 
     blockers: list[str] = []
     if decision["verdict"] != "READY":
