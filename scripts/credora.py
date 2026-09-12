@@ -18,6 +18,7 @@ if str(ROOT) not in sys.path:
 from scripts.context_bundle import build
 from scripts.init_user import init_user
 from scripts.review_draft import review
+from scripts.workspace import user_root
 
 REQUIRED_PROFILE_FILES = [
     "identity.md", "positioning.md", "expertise.md", "audience.md", "voice.md",
@@ -27,7 +28,10 @@ REQUIRED_PROFILE_FILES = [
 
 
 def workspace_status(slug: str) -> dict:
-    root = ROOT / "users" / slug
+    try:
+        root = user_root(ROOT, slug)
+    except ValueError as exc:
+        return {"status": "error", "user": slug, "ready": False, "error": str(exc)}
     if not root.exists():
         return {"status": "missing", "user": slug, "ready": False}
     missing = [x for x in REQUIRED_PROFILE_FILES if not (root / x).exists()]
@@ -60,19 +64,34 @@ def _read_text_files(folder: Path) -> list[str]:
     return samples
 
 
+def _load_json(path: Path, label: str) -> dict:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid {label} JSON in {path}: {exc.msg}") from exc
+    if not isinstance(value, dict):
+        raise ValueError(f"Invalid {label}: expected a JSON object in {path}")
+    return value
+
+
 def _load_user_review_inputs(slug: str) -> tuple[dict | None, list[str], list[str]]:
-    root = ROOT / "users" / slug
+    root = user_root(ROOT, slug)
     if not root.exists():
         raise FileNotFoundError(f"User workspace does not exist: {slug}")
 
     ledger = None
     ledger_path = root / "claim-ledger.json"
     if ledger_path.exists():
-        ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+        ledger = _load_json(ledger_path, "claim ledger")
 
     voice_samples = _read_text_files(root / "writing-samples")
     history = _read_text_files(root / "content-history")
     return ledger, voice_samples, history
+
+
+def _error(message: str, code: int = 2) -> int:
+    print(json.dumps({"status": "error", "error": message}, indent=2, ensure_ascii=False))
+    return code
 
 
 def main() -> int:
@@ -104,18 +123,21 @@ def main() -> int:
     if args.command == "setup":
         try:
             result = init_user(args.name, args.slug)
-        except FileExistsError as exc:
-            print(json.dumps({"status": "exists", "error": str(exc)}, indent=2))
-            return 2
+        except (FileExistsError, ValueError) as exc:
+            return _error(str(exc))
         print(json.dumps(result, indent=2, ensure_ascii=False))
         return 0
 
     if args.command == "status":
-        print(json.dumps(workspace_status(args.user), indent=2, ensure_ascii=False))
-        return 0
+        result = workspace_status(args.user)
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        return 2 if result["status"] == "error" else 0
 
     if args.command == "context":
-        text = build(args.platform, args.task, args.user)
+        try:
+            text = build(args.platform, args.task, args.user)
+        except ValueError as exc:
+            return _error(str(exc))
         if args.output:
             Path(args.output).write_text(text, encoding="utf-8")
         else:
@@ -123,7 +145,10 @@ def main() -> int:
         return 0
 
     if args.command == "review":
-        text = Path(args.draft).read_text(encoding="utf-8")
+        draft_path = Path(args.draft)
+        if not draft_path.is_file():
+            return _error(f"Draft file does not exist: {args.draft}")
+        text = draft_path.read_text(encoding="utf-8")
         ledger = None
         voice_samples: list[str] = []
         history: list[str] = []
@@ -131,14 +156,27 @@ def main() -> int:
         if args.user:
             try:
                 ledger, voice_samples, history = _load_user_review_inputs(args.user)
-            except FileNotFoundError as exc:
-                print(json.dumps({"status": "error", "error": str(exc)}, indent=2))
-                return 2
+            except (FileNotFoundError, ValueError) as exc:
+                return _error(str(exc))
 
-        if args.ledger:
-            ledger = json.loads(Path(args.ledger).read_text(encoding="utf-8"))
-        voice_samples.extend(Path(x).read_text(encoding="utf-8") for x in args.voice_sample)
-        history.extend(Path(x).read_text(encoding="utf-8") for x in args.history)
+        try:
+            if args.ledger:
+                ledger_path = Path(args.ledger)
+                if not ledger_path.is_file():
+                    return _error(f"Claim ledger file does not exist: {args.ledger}")
+                ledger = _load_json(ledger_path, "claim ledger")
+            for filename in args.voice_sample:
+                path = Path(filename)
+                if not path.is_file():
+                    return _error(f"Voice sample file does not exist: {filename}")
+                voice_samples.append(path.read_text(encoding="utf-8"))
+            for filename in args.history:
+                path = Path(filename)
+                if not path.is_file():
+                    return _error(f"History file does not exist: {filename}")
+                history.append(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, ValueError) as exc:
+            return _error(str(exc))
 
         result = review(text, ledger=ledger, voice_samples=voice_samples, history=history)
         result["user"] = args.user
