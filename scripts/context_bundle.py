@@ -13,6 +13,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
+from scripts.workspace import user_root
+
 BASE_FILES = [
     "identity.md",
     "positioning.md",
@@ -28,7 +30,7 @@ PLATFORMS = {"linkedin", "facebook", "instagram", "youtube"}
 
 
 def _root_for(user: str | None) -> Path:
-    return ROOT / "users" / user if user else ROOT / "profile"
+    return user_root(ROOT, user) if user else ROOT / "profile"
 
 
 def _load_preferences(path: Path, platform: str, task: str) -> list[dict]:
@@ -99,7 +101,10 @@ def main() -> int:
     p.add_argument("--user", help="Private workspace slug under users/<slug>")
     p.add_argument("--output")
     args = p.parse_args()
-    text = build(args.platform, args.task, args.user)
+    try:
+        text = build(args.platform, args.task, args.user)
+    except ValueError as exc:
+        p.error(str(exc))
     if args.output:
         Path(args.output).write_text(text, encoding="utf-8")
     else:
