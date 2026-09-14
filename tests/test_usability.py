@@ -13,9 +13,10 @@ class UsabilityTests(unittest.TestCase):
         ws = root / "users" / "demo"
         (ws / "platforms").mkdir(parents=True)
         (ws / "writing-samples").mkdir()
+        for rel in ["identity.md", "positioning.md", "expertise.md", "audience.md", "profile-goals.md", "voice.md"]:
+            (ws / rel).write_text("# Placeholder\n\nStatus: not initialized\n", encoding="utf-8")
         for rel in ["writing-rules.md", "forbidden-style.md"]:
             (ws / rel).write_text("# Rules\nClear and practical.\n", encoding="utf-8")
-        (ws / "voice.md").write_text("# Writing Voice\n\nStatus: not initialized\n", encoding="utf-8")
         for platform in ["linkedin", "facebook", "instagram", "youtube"]:
             (ws / "platforms" / f"{platform}.md").write_text(f"# {platform}\nUseful and accurate.\n", encoding="utf-8")
         (ws / "preferences.jsonl").write_text("", encoding="utf-8")
