@@ -31,7 +31,9 @@ def _valid_json(path: Path) -> tuple[bool, str | None]:
     if not path.exists():
         return True, None
     try:
-        json.loads(path.read_text(encoding="utf-8"))
+        value = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(value, dict):
+            return False, "expected a JSON object"
         return True, None
     except (json.JSONDecodeError, UnicodeError, OSError) as exc:
         return False, str(exc)
@@ -55,9 +57,9 @@ def doctor(slug: str, root: Path) -> dict:
     workspace = user_root(root, slug)
     if not workspace.is_dir():
         return {
-            "status": "error", "healthy": False, "user": slug,
-            "problems": ["Workspace does not exist."],
-            "next_action": f'Create it first: python scripts/credora.py start "Your Name"',
+            "status": "error", "healthy": False, "ready": False, "user": slug,
+            "problems": ["Workspace does not exist."], "warnings": [],
+            "next_action": 'Create it first: python scripts/credora.py start "Your Name"',
         }
 
     problems: list[str] = []
@@ -104,20 +106,22 @@ def doctor(slug: str, root: Path) -> dict:
         warnings.append("Brand brain has not been saved yet.")
 
     healthy = not problems
+    ready = healthy and not uninitialized and samples >= 3 and brain_path.is_file() and completeness >= 80
     if problems:
         next_action = "Fix the reported errors, then run doctor again."
     elif uninitialized:
         next_action = f"Finish setup: python scripts/credora.py onboard {slug}"
     elif samples < 3:
-        next_action = f"Add real writing samples to users/{slug}/writing-samples/ then run: python scripts/credora.py learn {slug}"
+        next_action = f"Add 3+ real writing samples to users/{slug}/writing-samples/ then run: python scripts/credora.py learn {slug}"
     elif not brain_path.is_file():
         next_action = f"Build the brand brain: python scripts/credora.py learn {slug}"
     else:
         next_action = f"Ready to use. Build context with: python scripts/credora.py context {slug} --platform linkedin --task post"
 
     return {
-        "status": "healthy" if healthy else "needs_fix",
+        "status": "ready" if ready else "needs_fix" if problems else "needs_attention",
         "healthy": healthy,
+        "ready": ready,
         "user": slug,
         "profile_completeness": completeness,
         "brand_confidence": confidence,
