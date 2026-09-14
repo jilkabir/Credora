@@ -2,35 +2,29 @@
 
 Credora can run as a private personal social media manager for multiple users without mixing their data.
 
-## Fastest setup
+## Fastest setup for non-technical users
 
-Create your workspace:
-
-```bash
-python scripts/credora.py setup "Jane Doe"
-```
-
-Credora tells you the next command. Run the guided onboarding:
+Run one command:
 
 ```bash
-python scripts/credora.py onboard jane-doe
+python scripts/credora.py start "Jane Doe"
 ```
 
-You only answer five plain-language questions:
+Credora creates the private workspace and immediately asks the short onboarding questions. No manual profile-file editing is required for the basic setup.
 
-1. Who are you professionally?
-2. What do you want people to know you for?
-3. What can you credibly teach or explain?
-4. Who do you want to reach?
-5. What should your social presence help you achieve?
+If you already have answers in a JSON file, use:
 
-Short answers are enough. Type `skip` if you want to complete something later.
+```bash
+python scripts/credora.py start "Jane Doe" --answers answers.json
+```
 
-## Teach Credora your real writing style
+## Improve the writing intelligence
 
-Put 3 or more real posts/articles in:
+Put at least 3 real writing samples (`.txt` or `.md`) into:
 
-`users/jane-doe/writing-samples/`
+```text
+users/jane-doe/writing-samples/
+```
 
 Then run:
 
@@ -38,35 +32,37 @@ Then run:
 python scripts/credora.py learn jane-doe
 ```
 
-Credora builds `brand-brain.json` and a writing-voice profile from observable features in those real samples. It uses positioning, audience, goals, expertise, vocabulary signals, sentence rhythm, paragraph density, person usage, punctuation and transition habits as soft writing constraints.
+Credora builds the personal Brand Brain and learns observable writing rhythm from the samples. It does not invent personality, credentials, stories, metrics, clients or outcomes.
 
-It does not infer missing credentials, sensitive traits, employers, metrics, clients, awards, publications, stories or outcomes.
+## Check whether everything is ready
 
-More samples improve voice confidence. Rough guide: 3 samples / 1,000 words gives medium voice confidence; 8 samples / 4,000 words gives high voice confidence.
+```bash
+python scripts/credora.py doctor jane-doe
+```
 
-## Create the personal manager context
+`doctor` checks missing profile data, writing-sample readiness, saved Brand Brain, malformed preferences, malformed claim ledgers and other setup problems. It returns one `next_action` so the user knows exactly what to do next.
 
-For LinkedIn:
+`ready: true` means the workspace has enough profile information, at least 3 writing samples and a saved Brand Brain. `healthy: true` only means no broken/corrupted setup was detected, so always look at `ready` too.
+
+## Build content context
 
 ```bash
 python scripts/credora.py context jane-doe --platform linkedin --task post
 ```
 
-For Facebook or Instagram, change the platform. For YouTube or spoken scripts:
+For YouTube or spoken scripts:
 
 ```bash
 python scripts/credora.py context jane-doe --platform youtube --task video-script
 ```
 
-The context now includes the Personal Brand Brain. The LLM is instructed to start from the user's brand nerve rather than a generic viral-post template, choose one audience-relevant angle, preserve verified positioning and use the user's observable writing rhythm when confidence allows.
+Credora keeps writing voice and speaking style separate.
 
-Writing voice and speaking style remain separate. Add speaking transcripts under `speaking-samples/` for future talking-style learning.
+## Ask Claude or another LLM to do the work
 
-## Ask Claude or another LLM to write
+Give the generated context to the LLM and request the content you need, for example:
 
-Example:
-
-> Write a LinkedIn post about my new research project. Use my Credora personal context. Keep the angle aligned with my positioning and audience, use my real writing rhythm, verify factual claims, avoid generic AI-style writing, and return the draft for approval.
+> Write a LinkedIn post about my new research project. Use my Credora profile, stay inside my verified positioning, verify factual claims, avoid AI-slop, and return the result for approval.
 
 The same workspace can support profile optimization, posts, comments, replies, DMs, carousels, content plans, repurposing and scripts.
 
@@ -78,38 +74,45 @@ Save a draft and run:
 python scripts/credora.py review draft.txt --user jane-doe
 ```
 
-Credora checks the user's real voice samples, previous content history and claim ledger when available. A passing draft is labelled `READY FOR APPROVAL`. User approval is always required. Credora does not auto-publish by default.
+A passing draft is labelled `READY FOR APPROVAL`. User approval is always required. Credora does not auto-publish by default.
 
-## Check readiness
+## Existing-user commands
+
+If you prefer the step-by-step flow instead of `start`:
 
 ```bash
-python scripts/credora.py status jane-doe
+python scripts/credora.py setup "Jane Doe"
+python scripts/credora.py onboard jane-doe
+python scripts/credora.py learn jane-doe
+python scripts/credora.py doctor jane-doe
 ```
 
-The report shows missing or uninitialized profile areas, whether the Brand Brain has been built, and how many writing samples are available.
-
-## Simple mental model
+## Architecture
 
 ```text
-User answers 5 questions
-        ↓
-Private profile workspace
-        ↓
-Real writing samples
-        ↓
-Credora Personal Brand Brain
-        ↓
-Positioning + audience + proof + goals + voice
-        ↓
-Platform-specific context
-        ↓
+User
+  ↓
+Private Credora workspace
+  ↓
+Guided onboarding
+  ↓
+Identity + positioning + expertise + audience + goals
+  ↓
+Real writing samples → writing voice
+  ↓
+Personal Brand Brain
+  ↓
+Platform-specific rules
+  ↓
 Claude or another LLM
-        ↓
-Evidence + anti-generic + repetition + voice + quality checks
-        ↓
+  ↓
+Evidence + style + repetition + quality checks
+  ↓
 READY FOR APPROVAL
-        ↓
+  ↓
 User approval
+  ↓
+Optional official publishing connector later
 ```
 
-Each user gets an isolated private workspace under `users/<slug>/`, which is ignored by Git by default.
+Each user gets an isolated workspace. Never load one user's private data into another user's context.
