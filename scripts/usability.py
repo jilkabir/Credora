@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 from scripts.profile_intelligence import build_brand_brain
+from scripts.style_profile import load_json_style
 from scripts.workspace import user_root
 
 PROFILE_FILES = [
@@ -92,6 +93,15 @@ def doctor(slug: str, root: Path) -> dict:
     if not ledger_ok:
         problems.append(f"claim-ledger.json is invalid: {ledger_error}")
 
+    style_path = workspace / "style.json"
+    if style_path.exists():
+        try:
+            load_json_style(style_path)
+        except (ValueError, OSError, UnicodeError) as exc:
+            problems.append(f"style.json is invalid: {exc}")
+    else:
+        warnings.append("No private style.json yet. Credora will use the conservative public default until one is created.")
+
     try:
         brain = build_brand_brain(workspace)
         completeness = brain.get("profile_completeness", 0)
@@ -127,6 +137,7 @@ def doctor(slug: str, root: Path) -> dict:
         "brand_confidence": confidence,
         "writing_samples": samples,
         "brand_brain_built": brain_path.is_file(),
+        "personal_style": "user" if style_path.is_file() else "default",
         "problems": problems,
         "warnings": warnings,
         "next_action": next_action,
