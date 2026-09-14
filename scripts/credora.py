@@ -12,6 +12,7 @@ from scripts.profile_intelligence import save_for_user
 from scripts.review_draft import review
 from scripts.social_manager import create_calendar, manager_status, queue_draft, set_approval
 from scripts.style_profile import load_for_user
+from scripts.training_pack import save_training_pack
 from scripts.usability import doctor
 from scripts.workspace import user_root
 REQUIRED_PROFILE_FILES=["identity.md","positioning.md","expertise.md","audience.md","voice.md","writing-rules.md","forbidden-style.md","profile-goals.md","platforms/linkedin.md","platforms/facebook.md","platforms/instagram.md","platforms/youtube.md"]
@@ -32,7 +33,7 @@ def workspace_status(slug:str)->dict:
     missing=[x for x in REQUIRED_PROFILE_FILES if not (root/x).exists()]
     uninitialized=[x for x in REQUIRED_PROFILE_FILES if (root/x).exists() and "Status: not initialized" in (root/x).read_text(encoding="utf-8")]
     ready=not missing and not uninitialized
-    return {"status":"ready" if ready else "incomplete","user":slug,"ready":ready,"missing_files":missing,"uninitialized_files":uninitialized,"brand_brain_built":(root/"brand-brain.json").is_file(),"writing_samples":len(_read_text_files(root/"writing-samples")),"approval_required":True,"auto_publish":False}
+    return {"status":"ready" if ready else "incomplete","user":slug,"ready":ready,"missing_files":missing,"uninitialized_files":uninitialized,"brand_brain_built":(root/"brand-brain.json").is_file(),"writing_samples":len(_read_text_files(root/"writing-samples")),"training_pack_built":(root/"training-pack.json").is_file(),"approval_required":True,"auto_publish":False}
 
 def _load_json(path:Path,label:str)->dict:
     try: value=json.loads(path.read_text(encoding="utf-8"))
@@ -63,7 +64,8 @@ def main()->int:
     start=sub.add_parser("start",help="Create workspace and guided onboarding"); start.add_argument("name"); start.add_argument("--slug"); start.add_argument("--answers")
     setup=sub.add_parser("setup"); setup.add_argument("name"); setup.add_argument("--slug")
     onboard=sub.add_parser("onboard"); onboard.add_argument("user"); onboard.add_argument("--answers"); onboard.add_argument("--overwrite",action="store_true")
-    learn=sub.add_parser("learn"); learn.add_argument("user")
+    learn=sub.add_parser("learn",help="Refresh Brand Brain and learned writing voice"); learn.add_argument("user")
+    train=sub.add_parser("train",help="Build a private runtime personalization pack from real user examples"); train.add_argument("user"); train.add_argument("--max-samples",type=int,default=8); train.add_argument("--max-chars",type=int,default=12000)
     doc=sub.add_parser("doctor"); doc.add_argument("user")
     status=sub.add_parser("status"); status.add_argument("user")
     context=sub.add_parser("context"); context.add_argument("user"); context.add_argument("--platform",choices=["linkedin","facebook","instagram","youtube"],default="linkedin"); context.add_argument("--task",default="post"); context.add_argument("--output")
@@ -76,13 +78,17 @@ def main()->int:
     args=p.parse_args()
     try:
         if args.command=="start":
-            created=init_user(args.name,args.slug); root=user_root(ROOT,created["slug"]); updated=apply_answers(root,_load_answers(args.answers)); brain=save_for_user(created["slug"],ROOT); result={"status":"ok","user":created["slug"],"workspace":created["workspace"],"updated_files":updated,"brand_brain":brain,"next":f"Add 3+ real writing samples, then run: python scripts/credora.py learn {created['slug']}"}
+            created=init_user(args.name,args.slug); root=user_root(ROOT,created["slug"]); updated=apply_answers(root,_load_answers(args.answers)); brain=save_for_user(created["slug"],ROOT); result={"status":"ok","user":created["slug"],"workspace":created["workspace"],"updated_files":updated,"brand_brain":brain,"next":f"Add 3+ real writing samples, then run: python scripts/credora.py train {created['slug']}"}
         elif args.command=="setup": result=init_user(args.name,args.slug); result["next"]=f"python scripts/credora.py onboard {result['slug']}"
         elif args.command=="onboard":
             root=user_root(ROOT,args.user)
             if not root.is_dir(): raise FileNotFoundError(f"User workspace does not exist: {args.user}")
             updated=apply_answers(root,_load_answers(args.answers),overwrite=args.overwrite); result={"status":"ok","user":args.user,"updated_files":updated,"brand_brain":save_for_user(args.user,ROOT)}
         elif args.command=="learn": result=save_for_user(args.user,ROOT)
+        elif args.command=="train":
+            brain=save_for_user(args.user,ROOT)
+            result=save_training_pack(args.user,ROOT,max_writing_samples=args.max_samples,max_chars=args.max_chars)
+            result["brand_brain_refresh"]=brain
         elif args.command=="doctor":
             result=doctor(args.user,ROOT); print(json.dumps(result,indent=2,ensure_ascii=False)); return 0 if result.get("healthy") else 2
         elif args.command=="status":
