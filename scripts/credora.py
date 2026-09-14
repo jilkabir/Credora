@@ -11,6 +11,7 @@ from scripts.init_user import init_user
 from scripts.profile_intelligence import save_for_user
 from scripts.review_draft import review
 from scripts.social_manager import create_calendar, manager_status, queue_draft, set_approval
+from scripts.style_profile import load_for_user
 from scripts.usability import doctor
 from scripts.workspace import user_root
 REQUIRED_PROFILE_FILES=["identity.md","positioning.md","expertise.md","audience.md","voice.md","writing-rules.md","forbidden-style.md","profile-goals.md","platforms/linkedin.md","platforms/facebook.md","platforms/instagram.md","platforms/youtube.md"]
@@ -99,12 +100,14 @@ def main()->int:
         elif args.command=="review":
             draft=Path(args.draft)
             if not draft.is_file(): raise FileNotFoundError(f"Draft file does not exist: {args.draft}")
-            ledger=None; voice=[]; history=[]
-            if args.user: ledger,voice,history=_load_user_review_inputs(args.user)
+            ledger=None; voice=[]; history=[]; config=None; style_source="default"
+            if args.user:
+                ledger,voice,history=_load_user_review_inputs(args.user)
+                config,style_source=load_for_user(ROOT,args.user)
             if args.ledger: ledger=_load_json(Path(args.ledger),"claim ledger")
             for f in args.voice_sample: voice.append(Path(f).read_text(encoding="utf-8"))
             for f in args.history: history.append(Path(f).read_text(encoding="utf-8"))
-            result=review(draft.read_text(encoding="utf-8"),ledger=ledger,voice_samples=voice,history=history); result["user"]=args.user
+            result=review(draft.read_text(encoding="utf-8"),ledger=ledger,voice_samples=voice,history=history,config=config); result["user"]=args.user; result["style_source"]=style_source
         else: return 1
     except (FileExistsError,FileNotFoundError,ValueError,OSError,UnicodeError) as exc: return _error(str(exc))
     print(json.dumps(result,indent=2,ensure_ascii=False)); return 0
