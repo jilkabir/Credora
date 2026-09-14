@@ -1,6 +1,6 @@
 {
-  "profile": "adrita-default",
-  "version": 1,
+  "profile": "credora-default",
+  "version": 2,
   "voice_fit_threshold": 65,
   "hard_banned_phrases": [
     "game-changer",
@@ -23,8 +23,8 @@
     "max_single_sentence_paragraph_ratio": 0.55
   },
   "notes": [
-    "Prefer conversational, explanatory, beginner-friendly professional English.",
-    "Use practical examples and present relevant trade-offs.",
-    "Do not invent personal stories, metrics, quotes, credentials, or outcomes."
+    "These are conservative public defaults, not a specific person's voice.",
+    "Prefer clear, specific, useful writing and adapt to verified user samples when available.",
+    "Do not invent personal stories, metrics, quotes, credentials, clients, or outcomes."
   ]
 }
