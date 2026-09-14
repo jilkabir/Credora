@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""Credora plug-and-play command line entrypoint.
-
-One command surface for private user setup, guided onboarding, brand learning,
-context generation, workspace status, and personalized draft review. It never
-auto-publishes.
-"""
+"""Credora plug-and-play command line entrypoint."""
 from __future__ import annotations
 
 import argparse
@@ -21,6 +16,7 @@ from scripts.guided_onboarding import apply_answers, interactive_answers
 from scripts.init_user import init_user
 from scripts.profile_intelligence import save_for_user
 from scripts.review_draft import review
+from scripts.usability import doctor
 from scripts.workspace import user_root
 
 REQUIRED_PROFILE_FILES = [
@@ -80,19 +76,30 @@ def _load_json(path: Path, label: str) -> dict:
     return value
 
 
+def _load_answers(path_value: str | None) -> dict[str, str]:
+    if not path_value:
+        return interactive_answers()
+    path = Path(path_value)
+    if not path.is_file():
+        raise FileNotFoundError(f"Answers file does not exist: {path_value}")
+    try:
+        answers = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise ValueError(f"Could not read onboarding answers: {exc}") from exc
+    if not isinstance(answers, dict):
+        raise ValueError("Onboarding answers must be a JSON object.")
+    return answers
+
+
 def _load_user_review_inputs(slug: str) -> tuple[dict | None, list[str], list[str]]:
     root = user_root(ROOT, slug)
     if not root.exists():
         raise FileNotFoundError(f"User workspace does not exist: {slug}")
-
     ledger = None
     ledger_path = root / "claim-ledger.json"
     if ledger_path.exists():
         ledger = _load_json(ledger_path, "claim ledger")
-
-    voice_samples = _read_text_files(root / "writing-samples")
-    history = _read_text_files(root / "content-history")
-    return ledger, voice_samples, history
+    return ledger, _read_text_files(root / "writing-samples"), _read_text_files(root / "content-history")
 
 
 def _error(message: str, code: int = 2) -> int:
@@ -103,6 +110,11 @@ def _error(message: str, code: int = 2) -> int:
 def main() -> int:
     p = argparse.ArgumentParser(prog="credora", description="Credora personal social media manager")
     sub = p.add_subparsers(dest="command", required=True)
+
+    start = sub.add_parser("start", help="Easiest setup: create workspace and run guided onboarding")
+    start.add_argument("name")
+    start.add_argument("--slug")
+    start.add_argument("--answers", help="Optional JSON answers file for non-interactive setup")
 
     setup = sub.add_parser("setup", help="Create a private user workspace")
     setup.add_argument("name")
@@ -116,6 +128,9 @@ def main() -> int:
     learn_cmd = sub.add_parser("learn", help="Build or refresh the user's personal brand brain")
     learn_cmd.add_argument("user")
 
+    doctor_cmd = sub.add_parser("doctor", help="Check setup health and tell you exactly what to do next")
+    doctor_cmd.add_argument("user")
+
     status = sub.add_parser("status", help="Inspect a user workspace")
     status.add_argument("user")
 
@@ -128,11 +143,28 @@ def main() -> int:
     check = sub.add_parser("review", help="Run readiness checks on a draft")
     check.add_argument("draft")
     check.add_argument("--user", help="Load this user's private voice samples, history, and claim ledger")
-    check.add_argument("--ledger", help="Optional explicit claim ledger JSON path; overrides user ledger")
-    check.add_argument("--voice-sample", action="append", default=[], help="Optional extra writing sample path")
-    check.add_argument("--history", action="append", default=[], help="Optional extra prior-content path")
+    check.add_argument("--ledger")
+    check.add_argument("--voice-sample", action="append", default=[])
+    check.add_argument("--history", action="append", default=[])
 
     args = p.parse_args()
+
+    if args.command == "start":
+        try:
+            created = init_user(args.name, args.slug)
+            answers = _load_answers(args.answers)
+            root = user_root(ROOT, created["slug"])
+            updated = apply_answers(root, answers)
+            brain = save_for_user(created["slug"], ROOT)
+        except (FileExistsError, FileNotFoundError, ValueError, OSError, UnicodeError) as exc:
+            return _error(str(exc))
+        result = {
+            "status": "ok", "user": created["slug"], "workspace": created["workspace"],
+            "updated_files": updated, "brand_brain": brain,
+            "next": f"Add 3+ real writing samples to users/{created['slug']}/writing-samples/ then run: python scripts/credora.py learn {created['slug']}",
+        }
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        return 0
 
     if args.command == "setup":
         try:
@@ -146,24 +178,13 @@ def main() -> int:
     if args.command == "onboard":
         try:
             root = user_root(ROOT, args.user)
-        except ValueError as exc:
+            if not root.is_dir():
+                return _error(f"User workspace does not exist: {args.user}")
+            answers = _load_answers(args.answers)
+            updated = apply_answers(root, answers, overwrite=args.overwrite)
+            brain = save_for_user(args.user, ROOT)
+        except (FileNotFoundError, ValueError, OSError, UnicodeError) as exc:
             return _error(str(exc))
-        if not root.is_dir():
-            return _error(f"User workspace does not exist: {args.user}")
-        if args.answers:
-            path = Path(args.answers)
-            if not path.is_file():
-                return _error(f"Answers file does not exist: {args.answers}")
-            try:
-                answers = json.loads(path.read_text(encoding="utf-8"))
-            except (OSError, UnicodeError, json.JSONDecodeError) as exc:
-                return _error(f"Could not read onboarding answers: {exc}")
-            if not isinstance(answers, dict):
-                return _error("Onboarding answers must be a JSON object.")
-        else:
-            answers = interactive_answers()
-        updated = apply_answers(root, answers, overwrite=args.overwrite)
-        brain = save_for_user(args.user, ROOT)
         print(json.dumps({"status": "ok", "user": args.user, "updated_files": updated, "brand_brain": brain, "next": f"Add real writing samples to users/{args.user}/writing-samples/ then run: python scripts/credora.py learn {args.user}"}, indent=2, ensure_ascii=False))
         return 0
 
@@ -175,6 +196,14 @@ def main() -> int:
         print(json.dumps(result, indent=2, ensure_ascii=False))
         return 0
 
+    if args.command == "doctor":
+        try:
+            result = doctor(args.user, ROOT)
+        except (ValueError, OSError, UnicodeError) as exc:
+            return _error(str(exc))
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        return 0 if result.get("healthy") else 2
+
     if args.command == "status":
         result = workspace_status(args.user)
         print(json.dumps(result, indent=2, ensure_ascii=False))
@@ -183,30 +212,25 @@ def main() -> int:
     if args.command == "context":
         try:
             text = build(args.platform, args.task, args.user)
-        except ValueError as exc:
+            if args.output:
+                Path(args.output).write_text(text, encoding="utf-8")
+            else:
+                print(text)
+        except (ValueError, OSError, UnicodeError) as exc:
             return _error(str(exc))
-        if args.output:
-            Path(args.output).write_text(text, encoding="utf-8")
-        else:
-            print(text)
         return 0
 
     if args.command == "review":
         draft_path = Path(args.draft)
         if not draft_path.is_file():
             return _error(f"Draft file does not exist: {args.draft}")
-        text = draft_path.read_text(encoding="utf-8")
-        ledger = None
-        voice_samples: list[str] = []
-        history: list[str] = []
-
-        if args.user:
-            try:
-                ledger, voice_samples, history = _load_user_review_inputs(args.user)
-            except (FileNotFoundError, ValueError) as exc:
-                return _error(str(exc))
-
         try:
+            text = draft_path.read_text(encoding="utf-8")
+            ledger = None
+            voice_samples: list[str] = []
+            history: list[str] = []
+            if args.user:
+                ledger, voice_samples, history = _load_user_review_inputs(args.user)
             if args.ledger:
                 ledger_path = Path(args.ledger)
                 if not ledger_path.is_file():
@@ -222,16 +246,11 @@ def main() -> int:
                 if not path.is_file():
                     return _error(f"History file does not exist: {filename}")
                 history.append(path.read_text(encoding="utf-8"))
-        except (OSError, UnicodeError, ValueError) as exc:
+            result = review(text, ledger=ledger, voice_samples=voice_samples, history=history)
+        except (FileNotFoundError, ValueError, OSError, UnicodeError) as exc:
             return _error(str(exc))
-
-        result = review(text, ledger=ledger, voice_samples=voice_samples, history=history)
         result["user"] = args.user
-        result["inputs"] = {
-            "voice_samples": len(voice_samples),
-            "history_items": len(history),
-            "claim_ledger": ledger is not None,
-        }
+        result["inputs"] = {"voice_samples": len(voice_samples), "history_items": len(history), "claim_ledger": ledger is not None}
         print(json.dumps(result, indent=2, ensure_ascii=False))
         return 0
 
