@@ -26,6 +26,26 @@ FILES = {
     "platforms/youtube.md": "# YouTube\n\nUse talking-style rather than article voice alone. Write for listening. Do not invent tool capabilities, numbers, urgency, or controversy. User approval is required.\n",
 }
 
+DEFAULT_STYLE = {
+    "profile": "user-default",
+    "version": 1,
+    "voice_fit_threshold": 65,
+    "hard_banned_phrases": [
+        "game-changer", "unlock your potential", "delve into", "let's dive in",
+        "here's the thing", "in today's fast-paced world", "elevate your game", "supercharge",
+    ],
+    "generic_ctas": ["thoughts?", "agree?", "what do you think?"],
+    "limits": {
+        "max_emojis_per_300_words": 2,
+        "max_em_dash_per_300_words": 1,
+        "max_single_sentence_paragraph_ratio": 0.55,
+    },
+    "notes": [
+        "Start conservative. Learn personal style from real user writing samples and explicit feedback.",
+        "Do not invent personal stories, metrics, quotes, credentials, clients, or outcomes.",
+    ],
+}
+
 
 def slugify(value: str) -> str:
     slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
@@ -45,12 +65,18 @@ def init_user(name: str, slug: str | None = None, force: bool = False) -> dict:
         if force or not path.exists():
             path.write_text(content, encoding="utf-8")
             created.append(rel)
+    style_path = root / "style.json"
+    if force or not style_path.exists():
+        style = dict(DEFAULT_STYLE)
+        style["profile"] = f"{user_slug}-default"
+        style_path.write_text(json.dumps(style, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        created.append("style.json")
     for folder in ["writing-samples", "speaking-samples", "content-history", "performance"]:
         (root / folder).mkdir(exist_ok=True)
     manifest = {
         "name": name,
         "slug": user_slug,
-        "schema_version": 1,
+        "schema_version": 2,
         "private_workspace": True,
         "approval_required": True,
         "auto_publish": False,
