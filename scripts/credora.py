@@ -5,6 +5,7 @@ import argparse, json, sys
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path: sys.path.insert(0, str(ROOT))
+from scripts.content_generation import prepare_generation_request
 from scripts.context_bundle import build
 from scripts.guided_onboarding import apply_answers, interactive_answers
 from scripts.init_user import init_user
@@ -70,6 +71,7 @@ def main()->int:
     status=sub.add_parser("status"); status.add_argument("user")
     context=sub.add_parser("context"); context.add_argument("user"); context.add_argument("--platform",choices=["linkedin","facebook","instagram","youtube"],default="linkedin"); context.add_argument("--task",default="post"); context.add_argument("--output")
     cal=sub.add_parser("calendar",help="Create a monthly social content plan"); cal.add_argument("user"); cal.add_argument("--month"); cal.add_argument("--posts",type=int,default=12); cal.add_argument("--platform",choices=["linkedin","facebook","instagram","youtube"],default="linkedin")
+    prep=sub.add_parser("prepare-draft",help="Prepare a grounded model request for a calendar item"); prep.add_argument("user"); prep.add_argument("calendar_id")
     q=sub.add_parser("queue",help="Put a draft into the approval queue"); q.add_argument("user"); q.add_argument("calendar_id"); q.add_argument("draft")
     approve=sub.add_parser("approve",help="Approve a queued draft (does not publish yet)"); approve.add_argument("user"); approve.add_argument("item_id")
     reject=sub.add_parser("reject",help="Reject a queued draft"); reject.add_argument("user"); reject.add_argument("item_id")
@@ -99,6 +101,7 @@ def main()->int:
             else: print(text)
             return 0
         elif args.command=="calendar": result=create_calendar(args.user,ROOT,month=args.month,posts=args.posts,platform=args.platform)
+        elif args.command=="prepare-draft": result=prepare_generation_request(args.user,ROOT,args.calendar_id)
         elif args.command=="queue": result=queue_draft(args.user,ROOT,calendar_id=args.calendar_id,draft_file=Path(args.draft))
         elif args.command=="approve": result=set_approval(args.user,ROOT,args.item_id,True)
         elif args.command=="reject": result=set_approval(args.user,ROOT,args.item_id,False)
