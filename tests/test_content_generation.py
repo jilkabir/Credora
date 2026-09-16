@@ -15,7 +15,19 @@ class ContentGenerationTests(unittest.TestCase):
         (ws / "speaking-samples").mkdir()
         (ws / "platforms" / "linkedin.md").write_text("Use clear professional language.", encoding="utf-8")
         (ws / "writing-samples" / "one.txt").write_text("A real writing sample.", encoding="utf-8")
-        (ws / "style.json").write_text(json.dumps({"profile":"demo","version":1}), encoding="utf-8")
+        (ws / "style.json").write_text(json.dumps({
+            "profile":"demo",
+            "version":2,
+            "voice_fit_threshold":65,
+            "hard_banned_phrases":[],
+            "generic_ctas":[],
+            "limits":{
+                "max_emojis_per_300_words":2,
+                "max_em_dash_per_300_words":1,
+                "max_single_sentence_paragraph_ratio":0.55
+            },
+            "notes":[]
+        }), encoding="utf-8")
         (ws / "brand-brain.json").write_text(json.dumps({
             "status":"ready", "confidence":"high", "positioning_signals":["documentation"],
             "source_sections":{"audience":"developers"}, "writing_strategy":{}
